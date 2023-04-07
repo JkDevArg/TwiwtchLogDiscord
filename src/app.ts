@@ -2,6 +2,7 @@ import "dotenv/config";
 import twitchClientConnect from "./config/twitch";
 import express from "express";
 import morgan from "morgan";
+import { config } from "dotenv";
 /* import discordClientConnect from "./config/discord"; */
 
 const PORT = process.env.PORT || 3000;
