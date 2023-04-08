@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@twurple/api": "^6.1.0",
+    "@twurple/auth": "^6.1.0",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.17",
     "@types/morgan": "^1.9.4",

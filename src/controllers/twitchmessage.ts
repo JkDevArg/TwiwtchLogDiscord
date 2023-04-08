@@ -3,10 +3,11 @@ import { Client } from "discord.js";
 import { discordChatMessage, sendTwitchFromDiscord } from "./discordMessageSend";
 import { openai, run, getModels } from "../config/openai";
 import { createUsers, getUserPoints } from "./usersControllers";
-import { validateCommands, CommandValidationResult, CommandPermissions, UserPermissions } from "../utils/validateCommands";
+import { validateCommands, CommandPermissions, UserPermissions } from "../utils/validateCommands";
 import { getFreeComments } from "../commands/freeCommands";
+import { checkIfUserFollows } from "./twitchFollower";
 
-  const twitchCommands = async (client: tmi.Client, discordClient: Client) => {
+const twitchCommands = async (client: tmi.Client, discordClient: Client) => {
 	client.on("message", async (channel: string, tags: ChatUserstate, message: string, self: boolean) => {
 		if (self) return; // ignore messages from the bot itself
 
@@ -23,13 +24,16 @@ import { getFreeComments } from "../commands/freeCommands";
 
     const msjSend = message ? message: '';
     const userName = tags.username ? tags.username : '';
+
+    const isFollower = await checkIfUserFollows(userName);
+    console.log(isFollower);
     await discordChatMessage(discordClient, `${userName}: ${msjSend}`);
 	  await sendTwitchFromDiscord(discordClient, client);
 
     const userPermissions: UserPermissions = {
       isVIP: isVIP,
       isSubscriber: isSubscriber,
-      isBroadcaster: isBroadcaster,
+      isBroadcaster: isBroadcaster || isFollower,
       isModerator: isModerator,
       isPartner: isPartner,
     };
