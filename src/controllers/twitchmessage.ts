@@ -4,6 +4,7 @@ import { discordChatMessage, sendTwitchFromDiscord } from "./discordMessageSend"
 import { openai, run, getModels } from "../config/openai";
 import { createUsers, getUserPoints } from "./usersControllers";
 import { validateCommands, CommandValidationResult, CommandPermissions, UserPermissions } from "../utils/validateCommands";
+import { getFreeComments } from "../commands/freeCommands";
 
   const twitchCommands = async (client: tmi.Client, discordClient: Client) => {
 	client.on("message", async (channel: string, tags: ChatUserstate, message: string, self: boolean) => {
@@ -13,8 +14,9 @@ import { validateCommands, CommandValidationResult, CommandPermissions, UserPerm
     const command = args.shift()?.toLowerCase();
 
     const isVIP = tags.badges?.vip != null;
+    const isTurbo = tags.badges?.turbo != null;
+    const isBits = tags.badges?.bits != null;
     const isSubscriber = tags.badges?.subscriber != null;
-    const isFollower = tags.badges?.founder != null
     const isBroadcaster = tags.badges?.broadcaster != null;
     const isModerator = tags.badges?.moderator != null;
     const isPartner = tags.badges?.partner != null;
@@ -27,11 +29,12 @@ import { validateCommands, CommandValidationResult, CommandPermissions, UserPerm
     const userPermissions: UserPermissions = {
       isVIP: isVIP,
       isSubscriber: isSubscriber,
-      isFollower: isFollower,
       isBroadcaster: isBroadcaster,
       isModerator: isModerator,
       isPartner: isPartner,
     };
+
+    console.log(tags.badges);
 
     const commandPermissions: CommandPermissions = {
       free: ['informacion', 'comandos', 'saludo'],
@@ -42,84 +45,73 @@ import { validateCommands, CommandValidationResult, CommandPermissions, UserPerm
 
     const allowedCommands = await validateCommands(command ? command : '', userPermissions, commandPermissions);
 
-    if(allowedCommands){
-      if (command === "saludo") {
-        client.say(channel, `Hola @${tags.username}!`);
-      }
+    //Free commands
+    const freeComments = await getFreeComments(command ? command : '', userName);
+    await discordChatMessage(discordClient, freeComments);
+    client.say(channel, freeComments);
+    //End free commands
 
-      if(command === "informacion"){
-        const msg = `Hola @${tags.username}! actualmente el sistema esta en BETA y pronto se podrá usar los puntos para cambiar por articulos o regalos!, puedes entrar a mi discord para mas novedades https://discord.gg/QzaB7sm2`;
+    if(command === "models"){
+      if (!allowedCommands.hasPermission) {
+        const msg = `Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
         await discordChatMessage(discordClient, msg);
         client.say(channel, msg);
+        return;
+      }else{
+        const models = await getModels();
+        const modelString = models.join(", ");
+        await discordChatMessage(discordClient, `ChatGPT: ${modelString}`);
+        client.say(channel, `ChatGPT: Modelos disponibles > ${modelString}`);
       }
+    }
 
-      if (command === "comandos") {
-        const msg = `Hola @${tags.username}! estos son los comandos: !models - !gpt - !registrar - !puntos -`;
+    if (command === "registrar"){
+      if (!allowedCommands.hasPermission) {
+        const msg = `Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
         await discordChatMessage(discordClient, msg);
         client.say(channel, msg);
+        return;
+      }else{
+        const userName = tags.username ? tags.username : '';
+        const userId = tags["user-id"] ? tags["user-id"] : '';
+        const msg = `Sistema: Registrando usuario...`;
+        client.say(channel, msg);
+        await discordChatMessage(discordClient, msg);
+        const res = await createUsers(userName, userId);
+        client.say(channel, `Sistema: ${userName} ${res}`);
+        await discordChatMessage(discordClient, `Sistema: ${userName} ${res}`);
       }
-      if(command === "models"){
-        if (!allowedCommands.hasPermission) {
-          const msg = `Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
-          await discordChatMessage(discordClient, msg);
-          client.say(channel, msg);
-          return;
-        }else{
-          const models = await getModels();
-          const modelString = models.join(", ");
-          await discordChatMessage(discordClient, `ChatGPT: ${modelString}`);
-          client.say(channel, `ChatGPT: Modelos disponibles > ${modelString}`);
-        }
-      }
+    }
 
-      if (command === "registrar"){
-        if (!allowedCommands.hasPermission) {
-          const msg = `Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
-          await discordChatMessage(discordClient, msg);
-          client.say(channel, msg);
-          return;
-        }else{
-          const userName = tags.username ? tags.username : '';
-          const userId = tags["user-id"] ? tags["user-id"] : '';
-          const msg = `Sistema: Registrando usuario...`;
-          client.say(channel, msg);
-          await discordChatMessage(discordClient, msg);
-          const res = await createUsers(userName, userId);
-          client.say(channel, `Sistema: ${userName} ${res}`);
-          await discordChatMessage(discordClient, `Sistema: ${userName} ${res}`);
-        }
+    if(command === "puntos"){
+      if (!allowedCommands.hasPermission) {
+        const msg = `Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
+        await discordChatMessage(discordClient, msg);
+        client.say(channel, msg);
+        return;
+      }else{
+        const userId = tags["user-id"] ? tags["user-id"] : '';
+        const res = await getUserPoints(userId);
+        await discordChatMessage(discordClient, `Sistema: ${res}`);
+        client.say(channel, `Sistema: ${res}`);
       }
+    }
 
-      if(command === "puntos"){
-        if (!allowedCommands.hasPermission) {
-          const msg = `Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
-          await discordChatMessage(discordClient, msg);
-          client.say(channel, msg);
-          return;
-        }else{
-          const userId = tags["user-id"] ? tags["user-id"] : '';
-          const res = await getUserPoints(userId);
-          await discordChatMessage(discordClient, `Sistema: ${res}`);
-          client.say(channel, `Sistema: ${res}`);
-        }
-      }
-
-      if (command === "gpt") {
-        if (!allowedCommands.hasPermission) {
-          const msg = `Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
-          await discordChatMessage(discordClient, msg);
-          client.say(channel, msg);
-          return;
-        }else{
-          if(message.length > 0){
-            try {
-              const responseGPT = await run(message);
-              //Send discord msg from CHAT GPT
-              await discordChatMessage(discordClient, `ChatGPT: ${responseGPT}`);
-              client.say(channel, `ChatGPT: ${responseGPT}`)
-            } catch (error) {
-              console.log(error);
-            }
+    if (command === "gpt") {
+      if (!allowedCommands.hasPermission) {
+        const msg = `sLo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
+        await discordChatMessage(discordClient, msg);
+        client.say(channel, msg);
+        return;
+      }else{
+        if(message.length > 0){
+          try {
+            const responseGPT = await run(message);
+            //Send discord msg from CHAT GPT
+            await discordChatMessage(discordClient, `ChatGPT: ${responseGPT}`);
+            client.say(channel, `ChatGPT: ${responseGPT}`)
+          } catch (error) {
+            console.log(error);
           }
         }
       }

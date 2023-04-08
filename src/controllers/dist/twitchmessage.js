@@ -40,40 +40,42 @@ var discordMessageSend_1 = require("./discordMessageSend");
 var openai_1 = require("../config/openai");
 var usersControllers_1 = require("./usersControllers");
 var validateCommands_1 = require("../utils/validateCommands");
+var freeCommands_1 = require("../commands/freeCommands");
 var twitchCommands = function (client, discordClient) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         client.on("message", function (channel, tags, message, self) { return __awaiter(void 0, void 0, void 0, function () {
-            var args, command, isVIP, isSubscriber, isFollower, isBroadcaster, isModerator, isPartner, msjSend, userName, userPermissions, commandPermissions, allowedCommands, msg, msg, msg, models, modelString, msg, userName_1, userId, msg, res, msg, userId, res, msg, responseGPT, error_1;
-            var _a, _b, _c, _d, _e, _f, _g;
-            return __generator(this, function (_h) {
-                switch (_h.label) {
+            var args, command, isVIP, isTurbo, isBits, isSubscriber, isBroadcaster, isModerator, isPartner, msjSend, userName, userPermissions, commandPermissions, allowedCommands, freeComments, msg, models, modelString, msg, userName_1, userId, msg, res, msg, userId, res, msg, responseGPT, error_1;
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            return __generator(this, function (_j) {
+                switch (_j.label) {
                     case 0:
                         if (self)
                             return [2 /*return*/]; // ignore messages from the bot itself
                         args = message.slice(1).split(" ");
                         command = (_a = args.shift()) === null || _a === void 0 ? void 0 : _a.toLowerCase();
                         isVIP = ((_b = tags.badges) === null || _b === void 0 ? void 0 : _b.vip) != null;
-                        isSubscriber = ((_c = tags.badges) === null || _c === void 0 ? void 0 : _c.subscriber) != null;
-                        isFollower = ((_d = tags.badges) === null || _d === void 0 ? void 0 : _d.founder) != null;
-                        isBroadcaster = ((_e = tags.badges) === null || _e === void 0 ? void 0 : _e.broadcaster) != null;
-                        isModerator = ((_f = tags.badges) === null || _f === void 0 ? void 0 : _f.moderator) != null;
-                        isPartner = ((_g = tags.badges) === null || _g === void 0 ? void 0 : _g.partner) != null;
+                        isTurbo = ((_c = tags.badges) === null || _c === void 0 ? void 0 : _c.turbo) != null;
+                        isBits = ((_d = tags.badges) === null || _d === void 0 ? void 0 : _d.bits) != null;
+                        isSubscriber = ((_e = tags.badges) === null || _e === void 0 ? void 0 : _e.subscriber) != null;
+                        isBroadcaster = ((_f = tags.badges) === null || _f === void 0 ? void 0 : _f.broadcaster) != null;
+                        isModerator = ((_g = tags.badges) === null || _g === void 0 ? void 0 : _g.moderator) != null;
+                        isPartner = ((_h = tags.badges) === null || _h === void 0 ? void 0 : _h.partner) != null;
                         msjSend = message ? message : '';
                         userName = tags.username ? tags.username : '';
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, userName + ": " + msjSend)];
                     case 1:
-                        _h.sent();
+                        _j.sent();
                         return [4 /*yield*/, discordMessageSend_1.sendTwitchFromDiscord(discordClient, client)];
                     case 2:
-                        _h.sent();
+                        _j.sent();
                         userPermissions = {
                             isVIP: isVIP,
                             isSubscriber: isSubscriber,
-                            isFollower: isFollower,
                             isBroadcaster: isBroadcaster,
                             isModerator: isModerator,
                             isPartner: isPartner
                         };
+                        console.log(tags.badges);
                         commandPermissions = {
                             free: ['informacion', 'comandos', 'saludo'],
                             premium: ['models', 'gpt', 'registrar', 'puntos'],
@@ -82,117 +84,104 @@ var twitchCommands = function (client, discordClient) { return __awaiter(void 0,
                         };
                         return [4 /*yield*/, validateCommands_1.validateCommands(command ? command : '', userPermissions, commandPermissions)];
                     case 3:
-                        allowedCommands = _h.sent();
-                        if (!allowedCommands) return [3 /*break*/, 30];
-                        if (command === "saludo") {
-                            client.say(channel, "Hola @" + tags.username + "!");
-                        }
-                        if (!(command === "informacion")) return [3 /*break*/, 5];
-                        msg = "Hola @" + tags.username + "! actualmente el sistema esta en BETA y pronto se podr\u00E1 usar los puntos para cambiar por articulos o regalos!, puedes entrar a mi discord para mas novedades https://discord.gg/QzaB7sm2";
-                        return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
+                        allowedCommands = _j.sent();
+                        return [4 /*yield*/, freeCommands_1.getFreeComments(command ? command : '', userName)];
                     case 4:
-                        _h.sent();
-                        client.say(channel, msg);
-                        _h.label = 5;
+                        freeComments = _j.sent();
+                        return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, freeComments)];
                     case 5:
-                        if (!(command === "comandos")) return [3 /*break*/, 7];
-                        msg = "Hola @" + tags.username + "! estos son los comandos: !models - !gpt - !registrar - !puntos -";
+                        _j.sent();
+                        client.say(channel, freeComments);
+                        if (!(command === "models")) return [3 /*break*/, 10];
+                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 7];
+                        msg = "Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
                     case 6:
-                        _h.sent();
-                        client.say(channel, msg);
-                        _h.label = 7;
-                    case 7:
-                        if (!(command === "models")) return [3 /*break*/, 12];
-                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 9];
-                        msg = "Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
-                        return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
-                    case 8:
-                        _h.sent();
+                        _j.sent();
                         client.say(channel, msg);
                         return [2 /*return*/];
-                    case 9: return [4 /*yield*/, openai_1.getModels()];
-                    case 10:
-                        models = _h.sent();
+                    case 7: return [4 /*yield*/, openai_1.getModels()];
+                    case 8:
+                        models = _j.sent();
                         modelString = models.join(", ");
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "ChatGPT: " + modelString)];
-                    case 11:
-                        _h.sent();
+                    case 9:
+                        _j.sent();
                         client.say(channel, "ChatGPT: Modelos disponibles > " + modelString);
-                        _h.label = 12;
-                    case 12:
-                        if (!(command === "registrar")) return [3 /*break*/, 18];
-                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 14];
-                        msg = "Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
+                        _j.label = 10;
+                    case 10:
+                        if (!(command === "registrar")) return [3 /*break*/, 16];
+                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 12];
+                        msg = "Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
-                    case 13:
-                        _h.sent();
+                    case 11:
+                        _j.sent();
                         client.say(channel, msg);
                         return [2 /*return*/];
-                    case 14:
+                    case 12:
                         userName_1 = tags.username ? tags.username : '';
                         userId = tags["user-id"] ? tags["user-id"] : '';
                         msg = "Sistema: Registrando usuario...";
                         client.say(channel, msg);
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
-                    case 15:
-                        _h.sent();
+                    case 13:
+                        _j.sent();
                         return [4 /*yield*/, usersControllers_1.createUsers(userName_1, userId)];
-                    case 16:
-                        res = _h.sent();
+                    case 14:
+                        res = _j.sent();
                         client.say(channel, "Sistema: " + userName_1 + " " + res);
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "Sistema: " + userName_1 + " " + res)];
-                    case 17:
-                        _h.sent();
-                        _h.label = 18;
-                    case 18:
-                        if (!(command === "puntos")) return [3 /*break*/, 23];
-                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 20];
-                        msg = "Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
+                    case 15:
+                        _j.sent();
+                        _j.label = 16;
+                    case 16:
+                        if (!(command === "puntos")) return [3 /*break*/, 21];
+                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 18];
+                        msg = "Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
-                    case 19:
-                        _h.sent();
+                    case 17:
+                        _j.sent();
                         client.say(channel, msg);
                         return [2 /*return*/];
-                    case 20:
+                    case 18:
                         userId = tags["user-id"] ? tags["user-id"] : '';
                         return [4 /*yield*/, usersControllers_1.getUserPoints(userId)];
-                    case 21:
-                        res = _h.sent();
+                    case 19:
+                        res = _j.sent();
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "Sistema: " + res)];
-                    case 22:
-                        _h.sent();
+                    case 20:
+                        _j.sent();
                         client.say(channel, "Sistema: " + res);
-                        _h.label = 23;
-                    case 23:
-                        if (!(command === "gpt")) return [3 /*break*/, 30];
-                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 25];
-                        msg = "Sistema: Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
+                        _j.label = 21;
+                    case 21:
+                        if (!(command === "gpt")) return [3 /*break*/, 28];
+                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 23];
+                        msg = "sLo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.";
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
-                    case 24:
-                        _h.sent();
+                    case 22:
+                        _j.sent();
                         client.say(channel, msg);
                         return [2 /*return*/];
-                    case 25:
-                        if (!(message.length > 0)) return [3 /*break*/, 30];
-                        _h.label = 26;
-                    case 26:
-                        _h.trys.push([26, 29, , 30]);
+                    case 23:
+                        if (!(message.length > 0)) return [3 /*break*/, 28];
+                        _j.label = 24;
+                    case 24:
+                        _j.trys.push([24, 27, , 28]);
                         return [4 /*yield*/, openai_1.run(message)];
-                    case 27:
-                        responseGPT = _h.sent();
+                    case 25:
+                        responseGPT = _j.sent();
                         //Send discord msg from CHAT GPT
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "ChatGPT: " + responseGPT)];
-                    case 28:
+                    case 26:
                         //Send discord msg from CHAT GPT
-                        _h.sent();
+                        _j.sent();
                         client.say(channel, "ChatGPT: " + responseGPT);
-                        return [3 /*break*/, 30];
-                    case 29:
-                        error_1 = _h.sent();
+                        return [3 /*break*/, 28];
+                    case 27:
+                        error_1 = _j.sent();
                         console.log(error_1);
-                        return [3 /*break*/, 30];
-                    case 30: return [2 /*return*/];
+                        return [3 /*break*/, 28];
+                    case 28: return [2 /*return*/];
                 }
             });
         }); });

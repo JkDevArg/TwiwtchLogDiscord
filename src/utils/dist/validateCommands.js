@@ -45,7 +45,7 @@ function validateCommands(command, userPermissions, commandPermissions) {
                 free = commandPermissions.free, premium = commandPermissions.premium, followerOrHigher = commandPermissions.followerOrHigher, moderatorOrHigher = commandPermissions.moderatorOrHigher;
                 isFreeCommand = free.includes(command.toLowerCase());
                 isPremiumCommand = premium.includes(command.toLowerCase());
-                isFollowerCommand = followerOrHigher.includes(command.toLowerCase()) && userPermissions.isFollower;
+                isFollowerCommand = followerOrHigher.includes(command.toLowerCase()) && userPermissions.isSubscriber;
                 isModeratorCommand = moderatorOrHigher.includes(command.toLowerCase()) && userPermissions.isModerator;
                 if (isFreeCommand || isPremiumCommand || isFollowerCommand || isModeratorCommand) {
                     if (isFreeCommand) {

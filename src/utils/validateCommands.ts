@@ -1,7 +1,6 @@
 interface UserPermissions {
     isVIP: boolean;
     isSubscriber: boolean;
-    isFollower: boolean;
     isBroadcaster: boolean;
     isModerator: boolean;
     isPartner: boolean;
@@ -24,7 +23,7 @@ async function validateCommands(command: string, userPermissions: UserPermission
         const { free, premium, followerOrHigher, moderatorOrHigher } = commandPermissions;
         const isFreeCommand = free.includes(command.toLowerCase());
         const isPremiumCommand = premium.includes(command.toLowerCase());
-        const isFollowerCommand = followerOrHigher.includes(command.toLowerCase()) && userPermissions.isFollower;
+        const isFollowerCommand = followerOrHigher.includes(command.toLowerCase()) && userPermissions.isSubscriber;
         const isModeratorCommand = moderatorOrHigher.includes(command.toLowerCase()) && userPermissions.isModerator;
 
         if (isFreeCommand || isPremiumCommand || isFollowerCommand || isModeratorCommand) {

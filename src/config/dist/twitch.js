@@ -36,58 +36,42 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.getUserPoints = exports.createUsers = void 0;
-var users_1 = require("../services/users");
-var validations_1 = require("../validations");
-function createUsers(username, id_twitch) {
-    return __awaiter(this, void 0, void 0, function () {
-        var active, validate, createUser;
+require("dotenv/config");
+var tmi_js_1 = require("tmi.js");
+var twitchmessage_1 = require("../controllers/twitchmessage");
+var discord_1 = require("./discord");
+var TWITCH_USERNAME = process.env.TWITCH_USERNAME || '';
+var TWITCH_PASSWORD = process.env.TWITCH_PASSWORD || '';
+var TWITCH_CHANNEL = process.env.TWITCH_CHANNEL || '';
+function twitchClientConnect() {
+    return __awaiter(this, void 0, Promise, function () {
+        var client, discordClient;
         return __generator(this, function (_a) {
-            active = username && id_twitch ? true : false;
-            validate = validations_1.validateParams({
-                active: active,
-                params: [
-                    {
-                        param: "string",
-                        date: username ? username : ""
-                    },
-                    {
-                        param: "string",
-                        date: id_twitch ? id_twitch : ""
-                    },
-                ]
-            });
-            // Devolvemos el error
-            if (!validate) {
-                return [2 /*return*/, validate];
+            switch (_a.label) {
+                case 0:
+                    client = new tmi_js_1["default"].Client({
+                        options: { debug: true },
+                        connection: {
+                            secure: true,
+                            reconnect: true
+                        },
+                        identity: {
+                            username: TWITCH_USERNAME,
+                            password: TWITCH_PASSWORD
+                        },
+                        channels: [TWITCH_CHANNEL]
+                    });
+                    return [4 /*yield*/, discord_1["default"]()];
+                case 1:
+                    discordClient = _a.sent();
+                    return [4 /*yield*/, client.connect()];
+                case 2:
+                    _a.sent();
+                    console.log("\x1b[32m%s\x1b[0m", "Twitch client connected.");
+                    twitchmessage_1["default"](client, discordClient);
+                    return [2 /*return*/];
             }
-            createUser = users_1.createUserDB(username, id_twitch);
-            return [2 /*return*/, createUser];
         });
     });
 }
-exports.createUsers = createUsers;
-function getUserPoints(id_twitch) {
-    return __awaiter(this, void 0, void 0, function () {
-        var active, validate, userPoints;
-        return __generator(this, function (_a) {
-            active = id_twitch ? true : false;
-            validate = validations_1.validateParams({
-                active: active,
-                params: [
-                    {
-                        param: "string",
-                        date: id_twitch ? id_twitch : ""
-                    },
-                ]
-            });
-            // Devolvemos el error
-            if (!validate) {
-                return [2 /*return*/, validate];
-            }
-            userPoints = users_1.getUserPointsDb(id_twitch);
-            return [2 /*return*/, userPoints];
-        });
-    });
-}
-exports.getUserPoints = getUserPoints;
+exports["default"] = twitchClientConnect;

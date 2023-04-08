@@ -36,55 +36,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.getUserPointsDb = exports.createUserDB = void 0;
-var db_1 = require("../config/db");
-function createUserDB(username, id_twitch) {
-    return __awaiter(this, void 0, void 0, function () {
-        var exec, status, msg, error_1;
+exports.getFreeComments = void 0;
+function getFreeComments(command, username) {
+    return __awaiter(this, void 0, Promise, function () {
+        var msg, msg, msg, msg;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, db_1.executeStoredProcedure('sp_set_new_users', [username, id_twitch])];
-                case 1:
-                    exec = _a.sent();
-                    status = exec[0][0]['status'] ? exec[0][0]['status'] : 500;
-                    msg = exec[0][0]['msg'] ? exec[0][0]['msg'] : '';
-                    if (status != '200' && msg == '') {
-                        return [2 /*return*/, 'No se pudo registrar el usuario, vuelva a intentar'];
-                    }
-                    return [2 /*return*/, msg];
-                case 2:
-                    error_1 = _a.sent();
-                    return [2 /*return*/, 'Ya te encuentras registrado en el sistema'];
-                case 3: return [2 /*return*/];
+            msg = '';
+            if (command === "saludo") {
+                msg = "Hola @" + username + "!";
             }
+            if (command === "informacion") {
+                msg = "Hola @" + username + "! actualmente el sistema esta en BETA y pronto se podr\u00E1 usar los puntos para cambiar por articulos o regalos!, puedes entrar a mi discord para mas novedades https://discord.gg/QzaB7sm2";
+            }
+            if (command === "comandos") {
+                msg = "Hola @" + username + "! estos son los comandos: !models - !gpt - !registrar - !puntos - !informacion - !comandos";
+            }
+            return [2 /*return*/, msg];
         });
     });
 }
-exports.createUserDB = createUserDB;
-function getUserPointsDb(id_twitch) {
-    return __awaiter(this, void 0, void 0, function () {
-        var exec, status, msg, error_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, db_1.executeStoredProcedure('sp_get_points_by_id_users', [id_twitch])];
-                case 1:
-                    exec = _a.sent();
-                    status = exec[0][0]['status'] ? exec[0][0]['status'] : 500;
-                    msg = exec[0][0]['points'] ? exec[0][0]['points'] : '';
-                    if (status != '200' && msg == '') {
-                        return [2 /*return*/, 'No se pudo obtener los puntos del usuario'];
-                    }
-                    return [2 /*return*/, msg];
-                case 2:
-                    error_2 = _a.sent();
-                    return [2 /*return*/, error_2];
-                case 3: return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.getUserPointsDb = getUserPointsDb;
+exports.getFreeComments = getFreeComments;
