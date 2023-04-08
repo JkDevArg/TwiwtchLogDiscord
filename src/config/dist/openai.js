@@ -36,34 +36,58 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.validateCommands = void 0;
-function validateCommands(command, userPermissions, commandPermissions) {
-    return __awaiter(this, void 0, Promise, function () {
-        var free, followerOrHigher, moderatorOrHigher, premium, isFreeCommand, isPremiumCommand, isFollowerCommand, isModeratorCommand;
+exports.getModels = exports.run = exports.openai = void 0;
+var openai_1 = require("openai");
+var cfg = new openai_1.Configuration({
+    apiKey: process.env.OPENAI_KEY
+});
+var openai = new openai_1.OpenAIApi(cfg);
+exports.openai = openai;
+function run(msg) {
+    return __awaiter(this, void 0, void 0, function () {
+        var runPrompt;
+        var _this = this;
         return __generator(this, function (_a) {
-            if (command) {
-                free = commandPermissions.free, followerOrHigher = commandPermissions.followerOrHigher, moderatorOrHigher = commandPermissions.moderatorOrHigher, premium = commandPermissions.premium;
-                isFreeCommand = free.includes(command.toLowerCase());
-                isPremiumCommand = premium.includes(command.toLowerCase());
-                isFollowerCommand = followerOrHigher.includes(command.toLowerCase()) && userPermissions.isSubscriber;
-                isModeratorCommand = moderatorOrHigher.includes(command.toLowerCase()) && userPermissions.isModerator;
-                if (isFreeCommand || isPremiumCommand || isFollowerCommand || isModeratorCommand) {
-                    if (isFreeCommand) {
-                        return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
+            runPrompt = function () { return __awaiter(_this, void 0, void 0, function () {
+                var prompt, response;
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            prompt = msg.split("!gpt")[1].trim();
+                            return [4 /*yield*/, openai.createChatCompletion({
+                                    model: "gpt-3.5-turbo",
+                                    messages: [{ role: "system", content: prompt }],
+                                    temperature: 0.9,
+                                    max_tokens: 100
+                                })];
+                        case 1:
+                            response = _b.sent();
+                            //Retornamos lo que nos devuelve
+                            return [2 /*return*/, (_a = response.data.choices[0].message) === null || _a === void 0 ? void 0 : _a.content];
                     }
-                    if (isFollowerCommand) {
-                        return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
-                    }
-                    if (isPremiumCommand && (userPermissions.isVIP || userPermissions.isBroadcaster || userPermissions.isModerator || userPermissions.isPartner)) {
-                        return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
-                    }
-                    if (isModeratorCommand) {
-                        return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
-                    }
-                }
-            }
-            return [2 /*return*/, { hasPermission: false, userPermissions: userPermissions }];
+                });
+            }); };
+            return [2 /*return*/, runPrompt()];
         });
     });
 }
-exports.validateCommands = validateCommands;
+exports.run = run;
+function getModels() {
+    return __awaiter(this, void 0, Promise, function () {
+        var models, data, filterIds;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, openai.listModels()];
+                case 1:
+                    models = _a.sent();
+                    data = models.data.data;
+                    filterIds = data
+                        .filter(function (model) { return !model.id.includes("-"); })
+                        .map(function (model) { return model.id; });
+                    return [2 /*return*/, filterIds];
+            }
+        });
+    });
+}
+exports.getModels = getModels;

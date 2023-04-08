@@ -15,9 +15,9 @@ async function run(msg:string){
         //Configuramos nuestro IA
         const response = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
-            messages: [{role: "user", content: prompt}],
-            max_tokens: 100,
-            temperature: 1,
+            messages: [{role: "system", content: prompt}],
+            temperature: 0.9,
+            max_tokens: 100
         });
         //Retornamos lo que nos devuelve
         return response.data.choices[0].message?.content;

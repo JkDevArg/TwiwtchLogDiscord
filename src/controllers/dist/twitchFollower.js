@@ -44,23 +44,23 @@ var TWITCH_ACCESS_TOKEN = process.env.TWITCH_ACCESS_TOKEN || '';
 var twitchAuth = new twitch_auth_1.ClientCredentialsAuthProvider(TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN);
 var twitchClient = new twitch_1.ApiClient({ authProvider: twitchAuth });
 // función para comprobar si un usuario sigue al canal
-function checkIfUserFollows(username) {
+function checkIfUserFollows(username, broadcaster) {
     return __awaiter(this, void 0, void 0, function () {
-        var user, userFollows, error_1;
+        var user, broadcasteId, validate, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log(username);
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 4, , 5]);
+                    _a.trys.push([0, 4, , 5]);
                     return [4 /*yield*/, twitchClient.helix.users.getUserByName(username)];
-                case 2:
+                case 1:
                     user = _a.sent();
-                    return [4 /*yield*/, twitchClient.helix.users.getFollows({ followedUser: user === null || user === void 0 ? void 0 : user.id })];
+                    return [4 /*yield*/, twitchClient.helix.users.getUserByName(broadcaster)];
+                case 2:
+                    broadcasteId = _a.sent();
+                    return [4 /*yield*/, twitchClient.helix.users.userFollowsBroadcaster((user === null || user === void 0 ? void 0 : user.id) ? user.id : '', (broadcasteId === null || broadcasteId === void 0 ? void 0 : broadcasteId.id) ? broadcasteId.id : '')];
                 case 3:
-                    userFollows = _a.sent();
-                    return [2 /*return*/, userFollows.total > 0];
+                    validate = _a.sent();
+                    return [2 /*return*/, validate ? validate : false];
                 case 4:
                     error_1 = _a.sent();
                     console.log(error_1);

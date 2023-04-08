@@ -6,12 +6,15 @@ const twitchAuth = new ClientCredentialsAuthProvider(TWITCH_CLIENT_ID, TWITCH_AC
 const twitchClient = new ApiClient({ authProvider: twitchAuth });
 
 // función para comprobar si un usuario sigue al canal
-async function checkIfUserFollows(username : string) {
-    console.log(username);
+async function checkIfUserFollows(username : string, broadcaster : string) {
   try {
+    //Obtenemos el id del seguidor
     const user = await twitchClient.helix.users.getUserByName(username);
-    const userFollows = await twitchClient.helix.users.getFollows({ followedUser: user?.id });
-    return userFollows.total > 0;
+    //Obtenemos el id del streamer
+    const broadcasteId = await twitchClient.helix.users.getUserByName(broadcaster);
+    /* const userFollows = await twitchClient.helix.users.getFollows({ followedUser: user?.id }); */
+    const validate = await twitchClient.helix.users.userFollowsBroadcaster(user?.id? user.id : '', broadcasteId?.id? broadcasteId.id : '')
+    return validate ? validate : false;
   } catch (error) {
     console.log(error);
     return false;

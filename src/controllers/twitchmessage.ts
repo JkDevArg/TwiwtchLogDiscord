@@ -15,8 +15,6 @@ const twitchCommands = async (client: tmi.Client, discordClient: Client) => {
     const command = args.shift()?.toLowerCase();
 
     const isVIP = tags.badges?.vip != null;
-    const isTurbo = tags.badges?.turbo != null;
-    const isBits = tags.badges?.bits != null;
     const isSubscriber = tags.badges?.subscriber != null;
     const isBroadcaster = tags.badges?.broadcaster != null;
     const isModerator = tags.badges?.moderator != null;
@@ -25,20 +23,17 @@ const twitchCommands = async (client: tmi.Client, discordClient: Client) => {
     const msjSend = message ? message: '';
     const userName = tags.username ? tags.username : '';
 
-    const isFollower = await checkIfUserFollows(userName);
-    console.log(isFollower);
+    const isFollower = await checkIfUserFollows(userName, "fetugamer");
     await discordChatMessage(discordClient, `${userName}: ${msjSend}`);
 	  await sendTwitchFromDiscord(discordClient, client);
 
     const userPermissions: UserPermissions = {
       isVIP: isVIP,
-      isSubscriber: isSubscriber,
-      isBroadcaster: isBroadcaster || isFollower,
+      isSubscriber: isSubscriber || isFollower,
+      isBroadcaster: isBroadcaster,
       isModerator: isModerator,
       isPartner: isPartner,
     };
-
-    console.log(tags.badges);
 
     const commandPermissions: CommandPermissions = {
       free: ['informacion', 'comandos', 'saludo'],
@@ -50,24 +45,12 @@ const twitchCommands = async (client: tmi.Client, discordClient: Client) => {
     const allowedCommands = await validateCommands(command ? command : '', userPermissions, commandPermissions);
 
     //Free commands
-    const freeComments = await getFreeComments(command ? command : '', userName);
-    await discordChatMessage(discordClient, freeComments);
-    client.say(channel, freeComments);
-    //End free commands
-
-    if(command === "models"){
-      if (!allowedCommands.hasPermission) {
-        const msg = `Lo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
-        await discordChatMessage(discordClient, msg);
-        client.say(channel, msg);
-        return;
-      }else{
-        const models = await getModels();
-        const modelString = models.join(", ");
-        await discordChatMessage(discordClient, `ChatGPT: ${modelString}`);
-        client.say(channel, `ChatGPT: Modelos disponibles > ${modelString}`);
-      }
+    if(commandPermissions.free.includes(command ? command : '')){
+      const freeComments = await getFreeComments(command ? command : '', userName);
+      await discordChatMessage(discordClient, freeComments);
+      client.say(channel, freeComments);
     }
+    //End free commands
 
     if (command === "registrar"){
       if (!allowedCommands.hasPermission) {
@@ -101,9 +84,23 @@ const twitchCommands = async (client: tmi.Client, discordClient: Client) => {
       }
     }
 
+    if(command === "models"){
+      if (!allowedCommands.hasPermission) {
+        const msg = `Lo siento, este comando solo puede ser ejecutado por VIP, suscriptores o administradores.`;
+        await discordChatMessage(discordClient, msg);
+        client.say(channel, msg);
+        return;
+      }else{
+        const models = await getModels();
+        const modelString = models.join(", ");
+        await discordChatMessage(discordClient, `ChatGPT: ${modelString}`);
+        client.say(channel, `ChatGPT: Modelos disponibles > ${modelString}`);
+      }
+    }
+
     if (command === "gpt") {
       if (!allowedCommands.hasPermission) {
-        const msg = `sLo siento, este comando solo puede ser ejecutado por Seguidores, VIP, suscriptores o administradores.`;
+        const msg = `Lo siento, este comando solo puede ser ejecutado por VIP, suscriptores o administradores.`;
         await discordChatMessage(discordClient, msg);
         client.say(channel, msg);
         return;
