@@ -39,15 +39,16 @@ exports.__esModule = true;
 exports.validateCommands = void 0;
 function validateCommands(command, userPermissions, commandPermissions) {
     return __awaiter(this, void 0, Promise, function () {
-        var free, followerOrHigher, moderatorOrHigher, premium, isFreeCommand, isPremiumCommand, isFollowerCommand, isModeratorCommand;
+        var free, followerOrHigher, moderatorOrHigher, premium, broadcasterOnly, isFreeCommand, isPremiumCommand, isFollowerCommand, isModeratorCommand, isBroadcasterPro;
         return __generator(this, function (_a) {
             if (command) {
-                free = commandPermissions.free, followerOrHigher = commandPermissions.followerOrHigher, moderatorOrHigher = commandPermissions.moderatorOrHigher, premium = commandPermissions.premium;
+                free = commandPermissions.free, followerOrHigher = commandPermissions.followerOrHigher, moderatorOrHigher = commandPermissions.moderatorOrHigher, premium = commandPermissions.premium, broadcasterOnly = commandPermissions.broadcasterOnly;
                 isFreeCommand = free.includes(command.toLowerCase());
                 isPremiumCommand = premium.includes(command.toLowerCase());
                 isFollowerCommand = followerOrHigher.includes(command.toLowerCase()) && userPermissions.isSubscriber;
                 isModeratorCommand = moderatorOrHigher.includes(command.toLowerCase()) && userPermissions.isModerator;
-                if (isFreeCommand || isPremiumCommand || isFollowerCommand || isModeratorCommand) {
+                isBroadcasterPro = broadcasterOnly.includes(command.toLowerCase()) && userPermissions.isBroadcaster;
+                if (isFreeCommand || isPremiumCommand || isFollowerCommand || isModeratorCommand || isBroadcasterPro) {
                     if (isFreeCommand) {
                         return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
                     }
@@ -58,6 +59,9 @@ function validateCommands(command, userPermissions, commandPermissions) {
                         return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
                     }
                     if (isModeratorCommand) {
+                        return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
+                    }
+                    if (isBroadcasterPro) {
                         return [2 /*return*/, { hasPermission: true, userPermissions: userPermissions }];
                     }
                 }

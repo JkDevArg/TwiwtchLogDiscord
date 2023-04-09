@@ -1,5 +1,5 @@
 import { executeStoredProcedure } from "../config/db";
-import { createUserDB, getUserPointsDb } from "../services/users";
+import { createUserDB, getUserPointsDb, setAddUserPointsDb } from "../services/users";
 import { validateParams } from "../validations";
 
 async function createUsers(username: string, id_twitch: string) {
@@ -59,4 +59,45 @@ async function getUserPoints(id_twitch: string) {
     return userPoints;
 }
 
-export { createUsers, getUserPoints};
+async function setAddUserPoints(username: string, cant: number, type: number, comment: string){
+    const active = username ? true : false;
+
+    const validate = validateParams({
+        active: active,
+        params: [
+            {
+                param: "string",
+                date: username ? username : "",
+            },
+            {
+                param: "number",
+                date: cant ? cant : "",
+            },
+            {
+                param: "number",
+                date: type ? type : "",
+            },
+            {
+                param: "string",
+                date: comment ? comment : "",
+            },
+        ],
+    });
+
+    if (!validate) {
+        return validate;
+    }
+
+    // Llamamos al servicio
+    const userAddPoints = setAddUserPointsDb(
+        username,
+        cant,
+        type,
+        comment
+    );
+
+    return userAddPoints;
+
+}
+
+export { createUsers, getUserPoints, setAddUserPoints};

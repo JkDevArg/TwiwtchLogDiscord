@@ -45,7 +45,7 @@ var twitchFollower_1 = require("./twitchFollower");
 var twitchCommands = function (client, discordClient) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         client.on("message", function (channel, tags, message, self) { return __awaiter(void 0, void 0, void 0, function () {
-            var args, command, isVIP, isSubscriber, isBroadcaster, isModerator, isPartner, msjSend, userName, isFollower, userPermissions, commandPermissions, allowedCommands, freeComments, msg, userName_1, userId, msg, res, msg, userId, res, msg, models, modelString, msg, responseGPT, error_1;
+            var args, command, userparam, params, comment, isVIP, isSubscriber, isBroadcaster, isModerator, isPartner, msjSend, userName, isFollower, userPermissions, commandPermissions, allowedCommands, freeComments, msg, userName_1, userId, msg, res, msg, userId, res, msg, username, cant, type, addcomment, res, msg, models, modelString, msg, responseGPT, error_1;
             var _a, _b, _c, _d, _e, _f;
             return __generator(this, function (_g) {
                 switch (_g.label) {
@@ -54,6 +54,9 @@ var twitchCommands = function (client, discordClient) { return __awaiter(void 0,
                             return [2 /*return*/]; // ignore messages from the bot itself
                         args = message.slice(1).split(" ");
                         command = (_a = args.shift()) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+                        userparam = args[0] ? args[0].toLowerCase() : '';
+                        params = args[1] ? parseInt(args[1]) : '';
+                        comment = args[2] ? args[1].toLowerCase() : '';
                         isVIP = ((_b = tags.badges) === null || _b === void 0 ? void 0 : _b.vip) != null;
                         isSubscriber = ((_c = tags.badges) === null || _c === void 0 ? void 0 : _c.subscriber) != null;
                         isBroadcaster = ((_d = tags.badges) === null || _d === void 0 ? void 0 : _d.broadcaster) != null;
@@ -81,7 +84,8 @@ var twitchCommands = function (client, discordClient) { return __awaiter(void 0,
                             free: ['informacion', 'comandos', 'saludo'],
                             premium: ['models', 'gpt', 'registrar', 'puntos'],
                             followerOrHigher: ['registrar', 'puntos'],
-                            moderatorOrHigher: ['models', 'gpt', 'registrar', 'puntos']
+                            moderatorOrHigher: ['models', 'gpt', 'registrar', 'puntos'],
+                            broadcasterOnly: ['apuntos', 'rpuntos']
                         };
                         return [4 /*yield*/, validateCommands_1.validateCommands(command ? command : '', userPermissions, commandPermissions)];
                     case 4:
@@ -140,25 +144,29 @@ var twitchCommands = function (client, discordClient) { return __awaiter(void 0,
                         client.say(channel, "Sistema: " + res);
                         _g.label = 18;
                     case 18:
-                        if (!(command === "models")) return [3 /*break*/, 23];
+                        if (!(command === "apuntos" || command === "rpuntos")) return [3 /*break*/, 23];
                         if (!!allowedCommands.hasPermission) return [3 /*break*/, 20];
-                        msg = "Lo siento, este comando solo puede ser ejecutado por VIP, suscriptores o administradores.";
+                        msg = "Lo siento, este comando solo puede ser ejecutado por el streamer o un administrador.";
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
                     case 19:
                         _g.sent();
                         client.say(channel, msg);
                         return [2 /*return*/];
-                    case 20: return [4 /*yield*/, openai_1.getModels()];
+                    case 20:
+                        username = userparam ? userparam : '';
+                        cant = params ? params : 0;
+                        type = (command === "apuntos" ? 0 : (command === "rpuntos" ? 1 : 0));
+                        addcomment = comment ? comment : '';
+                        return [4 /*yield*/, usersControllers_1.setAddUserPoints(username, cant, type, addcomment)];
                     case 21:
-                        models = _g.sent();
-                        modelString = models.join(", ");
-                        return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "ChatGPT: " + modelString)];
+                        res = _g.sent();
+                        return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "Sistema: " + res)];
                     case 22:
                         _g.sent();
-                        client.say(channel, "ChatGPT: Modelos disponibles > " + modelString);
+                        client.say(channel, "Sistema: " + res);
                         _g.label = 23;
                     case 23:
-                        if (!(command === "gpt")) return [3 /*break*/, 30];
+                        if (!(command === "models")) return [3 /*break*/, 28];
                         if (!!allowedCommands.hasPermission) return [3 /*break*/, 25];
                         msg = "Lo siento, este comando solo puede ser ejecutado por VIP, suscriptores o administradores.";
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
@@ -166,26 +174,44 @@ var twitchCommands = function (client, discordClient) { return __awaiter(void 0,
                         _g.sent();
                         client.say(channel, msg);
                         return [2 /*return*/];
-                    case 25:
-                        if (!(message.length > 0)) return [3 /*break*/, 30];
-                        _g.label = 26;
+                    case 25: return [4 /*yield*/, openai_1.getModels()];
                     case 26:
-                        _g.trys.push([26, 29, , 30]);
-                        return [4 /*yield*/, openai_1.run(message)];
+                        models = _g.sent();
+                        modelString = models.join(", ");
+                        return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "ChatGPT: " + modelString)];
                     case 27:
+                        _g.sent();
+                        client.say(channel, "ChatGPT: Modelos disponibles > " + modelString);
+                        _g.label = 28;
+                    case 28:
+                        if (!(command === "gpt")) return [3 /*break*/, 35];
+                        if (!!allowedCommands.hasPermission) return [3 /*break*/, 30];
+                        msg = "Lo siento, este comando solo puede ser ejecutado por VIP, suscriptores o administradores.";
+                        return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, msg)];
+                    case 29:
+                        _g.sent();
+                        client.say(channel, msg);
+                        return [2 /*return*/];
+                    case 30:
+                        if (!(message.length > 0)) return [3 /*break*/, 35];
+                        _g.label = 31;
+                    case 31:
+                        _g.trys.push([31, 34, , 35]);
+                        return [4 /*yield*/, openai_1.run(message)];
+                    case 32:
                         responseGPT = _g.sent();
                         //Send discord msg from CHAT GPT
                         return [4 /*yield*/, discordMessageSend_1.discordChatMessage(discordClient, "ChatGPT: " + responseGPT)];
-                    case 28:
+                    case 33:
                         //Send discord msg from CHAT GPT
                         _g.sent();
                         client.say(channel, "ChatGPT: " + responseGPT);
-                        return [3 /*break*/, 30];
-                    case 29:
+                        return [3 /*break*/, 35];
+                    case 34:
                         error_1 = _g.sent();
                         console.log(error_1);
-                        return [3 /*break*/, 30];
-                    case 30: return [2 /*return*/];
+                        return [3 /*break*/, 35];
+                    case 35: return [2 /*return*/];
                 }
             });
         }); });

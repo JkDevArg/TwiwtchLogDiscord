@@ -11,6 +11,7 @@ interface CommandPermissions {
     premium: string[];
     followerOrHigher: string[];
     moderatorOrHigher: string[];
+    broadcasterOnly: string[];
 }
 
 interface CommandValidationResult {
@@ -20,12 +21,14 @@ interface CommandValidationResult {
 
 async function validateCommands(command: string, userPermissions: UserPermissions, commandPermissions: CommandPermissions): Promise<CommandValidationResult> {
     if (command) {
-        const { free, followerOrHigher, moderatorOrHigher, premium} = commandPermissions;
+        const { free, followerOrHigher, moderatorOrHigher, premium, broadcasterOnly } = commandPermissions;
         const isFreeCommand = free.includes(command.toLowerCase());
         const isPremiumCommand = premium.includes(command.toLowerCase());
         const isFollowerCommand = followerOrHigher.includes(command.toLowerCase()) && userPermissions.isSubscriber;
         const isModeratorCommand = moderatorOrHigher.includes(command.toLowerCase()) && userPermissions.isModerator;
-        if (isFreeCommand || isPremiumCommand || isFollowerCommand || isModeratorCommand) {
+        const isBroadcasterPro = broadcasterOnly.includes(command.toLowerCase()) && userPermissions.isBroadcaster;
+
+        if (isFreeCommand || isPremiumCommand || isFollowerCommand || isModeratorCommand || isBroadcasterPro) {
 
             if (isFreeCommand) {
                 return { hasPermission: true, userPermissions };
@@ -40,6 +43,10 @@ async function validateCommands(command: string, userPermissions: UserPermission
             }
 
             if (isModeratorCommand) {
+                return { hasPermission: true, userPermissions };
+            }
+
+            if (isBroadcasterPro) {
                 return { hasPermission: true, userPermissions };
             }
         }
