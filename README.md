@@ -112,8 +112,8 @@ const response = await openai.createChatCompletion({
   donde utilizamos para validar los datos de envio para registra u obtener puntos, aparte de que tenemos la opción de agregar y restar puntos.
   
   
- #Sistema y explicación
- 
+# Sistema y explicación
+  
 Es un sistema pequeño pero que va creciendo, actualmente se utiliza una base de datos donde guarda datos como los de usuarios para gestionar los puntos que ganan o
 que pierden. Siendo el administrador tendrán acceso a ciertos comandos para poder gestionar los puntos en twitch, se implemento Chat GPT para gastar esos "puntos"
 que se adquieren por la actividad en el stream, aparte de ello se esta implementado al chat gpt una función especial para poder enseñarle a tener una respuesta
