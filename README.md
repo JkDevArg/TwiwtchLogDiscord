@@ -11,7 +11,7 @@ Save log or chat from Twitch to Discord
 - discord.js
 
 
-## Procesos de instalación
+## Procesos de Configuración
 
 Antes que nada deberán de obtener las API Key de 
 
@@ -97,6 +97,11 @@ const response = await openai.createChatCompletion({
   **moderatorOrHigher** = Moderadores o en adelante.
   
   **broadcasterOnly** = Streamer
+  
+  # Instalación
+  
+ ```npm install```
+ ```npm run dev```
   
   
   # Estructura
